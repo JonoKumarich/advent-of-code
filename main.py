@@ -5,14 +5,15 @@ from pathlib import Path
 def run_day(day: int, part: int, test: bool) -> None:
     day_module = importlib.import_module(f"answers.day_{day:02d}.answer")
 
-    if test:
-        print(f"Running test for Day {day}, Part {part}")
-        output = getattr(day_module, f"test_{part:02d}")()
-    else:
-        input_path = Path(__file__).parent / "answers/day_{day:02d}/input.txt"
-        print(f"Running Day {day}, Part {part}")
-        output = getattr(day_module, f"part_{part:02d}")(input_path)
-
+    run_type = f'test_{part:02d}' if test else 'input'
+    
+    input_path = Path(__file__).parent / f"answers/day_{day:02d}/{run_type}.txt"
+    with open(input_path) as f:
+        input = f.read()
+    
+    print(f"Running {run_type} Case {day}, Part {part}")
+    output = getattr(day_module, f"part_{part:02d}")(input)
+    
     print(f"Output: \n{output}")
 
 if __name__ == "__main__":
