@@ -36,15 +36,6 @@ def parse_races(input: str) -> list[tuple[int, int]]:
 def parse_single_race(input: str) -> tuple[int, int]:
     # Maybe clean this up for readability
     return [int(''.join(line.split(": ")[1].split())) for line in input.splitlines()]
-
-
-def calculate_winning_range(race: tuple[int, int]) -> tuple[int, int]:    
-    total_time, record_distance = race
-    
-    min_hold_time = find_winning_time_bound(total_time, record_distance, 'start')
-    max_hold_time = find_winning_time_bound(total_time, record_distance, 'end')
-    
-    return min_hold_time, max_hold_time
         
 
 def find_winning_time_bound(total_time: int, record_distance: int, bound: str) -> int:
