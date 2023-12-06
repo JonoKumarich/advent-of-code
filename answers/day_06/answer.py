@@ -5,11 +5,21 @@ def part_01(input: str) -> str:
     races = parse_races(input)
     num_ways_to_win = []
     
-    for race in races:
-        start, end = calculate_winning_range(race)
-        num_ways_to_win.append(end - start + 1)
+    for total_time, record_distance in races:
+        min_hold_time = find_winning_time_bound(total_time, record_distance, 'start')
+        max_hold_time = find_winning_time_bound(total_time, record_distance, 'end')
+        num_ways_to_win.append(max_hold_time - min_hold_time + 1)
         
     return math.prod(num_ways_to_win)
+
+
+def part_02(input: str) -> str:
+    total_time, record_distance = parse_single_race(input)
+    
+    min_hold_time = find_winning_time_bound(total_time, record_distance, 'start')
+    max_hold_time = find_winning_time_bound(total_time, record_distance, 'end')
+        
+    return max_hold_time - min_hold_time + 1
 
 
 def parse_line(line: str) -> list[int]:
@@ -19,32 +29,34 @@ def parse_line(line: str) -> list[int]:
 def parse_races(input: str) -> list[tuple[int, int]]:
     """List of tuples where first element is time, and second element is distance record"""
     lines = [parse_line(line) for line in input.splitlines()]
-    return [tuple(race) for race in zip(*lines)]
+    transposed_lines = [tuple(race) for race in zip(*lines)]
+    return transposed_lines
 
 
-def calculate_winning_range(race: tuple[int, int]) -> tuple[int, int]:
-    min_hold_time = 0
-    max_hold_time = 0
-    
+def parse_single_race(input: str) -> tuple[int, int]:
+    # Maybe clean this up for readability
+    return [int(''.join(line.split(": ")[1].split())) for line in input.splitlines()]
+
+
+def calculate_winning_range(race: tuple[int, int]) -> tuple[int, int]:    
     total_time, record_distance = race
     
-    # Find min_hold
-    for hold_time in range(total_time + 1):
-        time_remaining = total_time - hold_time
-        if hold_time * time_remaining > record_distance: # Assuming we have to better the time and not match it
-            min_hold_time = hold_time
-            break
-        
-    # Find max_hold
-    for hold_time in reversed(range(total_time + 1)):
-        time_remaining = total_time - hold_time
-        if hold_time * time_remaining > record_distance:
-            max_hold_time = hold_time
-            break
+    min_hold_time = find_winning_time_bound(total_time, record_distance, 'start')
+    max_hold_time = find_winning_time_bound(total_time, record_distance, 'end')
     
     return min_hold_time, max_hold_time
         
-    
 
-def part_02(input: str) -> str:
-    return "Part two answer"
+def find_winning_time_bound(total_time: int, record_distance: int, bound: str) -> int:
+    if bound not in ['start', 'end']:
+        raise ValueError(f"Bound value: {bound} not allowed. Accepted values: 'start', 'end'")
+    
+    base_range = range(total_time + 1)
+    time_range = base_range if bound == 'start' else reversed(base_range)
+    
+    for hold_time in time_range:
+        time_remaining = total_time - hold_time
+        if hold_time * time_remaining > record_distance:
+            return hold_time
+
+    raise ValueError("No winning time found for these conditions")    
