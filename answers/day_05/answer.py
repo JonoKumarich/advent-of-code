@@ -12,6 +12,11 @@ def part_01(input: str) -> str:
 
 
 def part_02(input: str) -> str:
+    """
+    This part is tricky because the sheer volume of seeds makes it computationally non-trivial
+    to process seeds, one by one. This method processes seeds in bulk, by assigning each sub-range
+    a mapping bin, and then translating the whole sub-range by the offset between source and destination.
+    """
     groups = input.split('\n\n')
     
     seed_info = [int(seed) for seed in groups[0].split()[1:]]
