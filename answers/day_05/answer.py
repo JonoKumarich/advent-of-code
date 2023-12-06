@@ -20,6 +20,7 @@ def part_02(input: str) -> str:
     
     for value_map in maps.values():
         bulk_seed_mappings = []
+        
         for seed_start, range_size in seed_ranges:
             # Get bulk ranges for seeds
             bulk_seed_mappings.extend(bulk_seed_map(seed_start, range_size, value_map))
@@ -30,9 +31,9 @@ def part_02(input: str) -> str:
             offset = 0 if bin is None else value_map[bin][0] - value_map[bin][1]
             
             # Updated seed_ranges with new bulk mapping translations
-            seed_ranges.append((mapping[0] + offset, mapping[1] + offset))
+            seed_ranges.append((mapping[0] + offset, (mapping[1] + offset) - (mapping[0] + offset)))
         
-    return seed_ranges
+    return min([seed[0] for seed in seed_ranges])
 
 
 def get_map(groups: list[str], index: int) -> ValueMap:
@@ -93,11 +94,10 @@ def bulk_seed_map(seed_start: int, seed_range: int, value_map: ValueMap) -> list
                 break
             
             if bin == len(value_map) - 1:
-                # FIXME: It fucks out on the first pass, second map - here
-                # Because when last value have no bin, it can't find the min of the next bin, should return end of 
                 try:
                     next_bin = min(bin[1] for bin in value_map if bin[1] > current_seed)
                 except ValueError:
+                    # If there is no next bin, go to end of seed range
                     next_bin = seed_start + seed_range
                 bulk_seed_maps.append([current_seed, next_bin, None])
                 current_seed = next_bin
