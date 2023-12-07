@@ -3,12 +3,12 @@ from typing import TypeVar
 from collections import defaultdict
 from typing import DefaultDict, TypeVar
 from collections import defaultdict
-import bisect
 from dataclasses import dataclass
 
 
 T = TypeVar("T")
 CARD_ORDERS = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+JOKER_CARD_ORDERS = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J']
 
 
 class HandType(Enum):
@@ -43,26 +43,31 @@ class Turn:
             return self_rank > other_rank
         
         raise ValueError("Two hands equal???")
-
-
-def part_01(input: str) -> int:
-    turns = parse_input(input)
-    values: list[Turn] = []
-    
-    for turn in turns:
-        bisect.insort(values, turn)
-    
-    return sum([(i + 1) * turn.bet for i, turn in enumerate(values)])
     
 
-
-def part_02(input: str) -> str:
-    return "Part two answer"
-
-
-def parse_input(input: str) -> list[Turn]:
-    lines = [line.split() for line in input.splitlines()]
-    return [Turn(hand, int(bet)) for (hand, bet) in lines]
+# FIXME: Remove the repeated boilerplate here to clean up
+@dataclass
+class JokerTurn:
+    hand: str
+    bet: int
+    
+    def __lt__(self, other: "Turn") -> bool:
+        self_hand_type = calculate_hand_type_with_joker(self.hand)
+        other_hand_type = calculate_hand_type_with_joker(other.hand)
+        
+        if self_hand_type != other_hand_type:
+            return self_hand_type.value < other_hand_type.value
+        
+        for i in range(len(self.hand)):
+            self_card, other_card = self.hand[i], other.hand[i]
+            if self_card == other_card:
+                continue
+            
+            self_rank = JOKER_CARD_ORDERS.index(self_card)
+            other_rank = JOKER_CARD_ORDERS.index(other_card)
+            return self_rank > other_rank
+        
+        raise ValueError("Two hands equal???")
 
 
 def count_frequency(iterable: list[T]) -> DefaultDict[T, int]:
@@ -93,3 +98,41 @@ def calculate_hand_type(hand: str) -> HandType:
         case _:
             raise ValueError("Hand value can not be calculated")
     
+
+    
+def calculate_hand_type_with_joker(hand: str) -> HandType:
+    if 'J' not in hand:
+        return calculate_hand_type(hand)
+    
+    frequencies = count_frequency(list(hand))
+    
+    
+    match len(frequencies):
+        case 1:
+            return HandType.FIVE_OF_A_KIND # JJJJJ
+        case 2:
+            return HandType.FIVE_OF_A_KIND # JJJJX, JXXXX, JJJXX, JJXXX
+        case 3:
+            if frequencies['J'] == 1 and max(frequencies.values()) == 2:
+                return HandType.FULL_HOUSE
+            else:
+                return HandType.FOUR_OF_A_KIND            
+        case 4:
+            return HandType.THREE_OF_A_KIND
+        case 5:
+            return HandType.ONE_PAIR
+        case _:
+            raise ValueError("Hand value can not be calculated")
+
+
+def part_01(input: str) -> int:
+    lines = [line.split() for line in input.splitlines()]
+    turns = sorted([Turn(hand, int(bet)) for (hand, bet) in lines])
+    return sum([(i + 1) * turn.bet for i, turn in enumerate(turns)])
+
+
+def part_02(input: str) -> int:
+    lines = [line.split() for line in input.splitlines()]
+    turns = sorted([JokerTurn(hand, int(bet)) for (hand, bet) in lines])
+    
+    return sum([(i + 1) * turn.bet for i, turn in enumerate(turns)])
