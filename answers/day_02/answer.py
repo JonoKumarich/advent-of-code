@@ -5,14 +5,14 @@ MAX_COLORS = {
 }
 
 
-def get_games(input: str) -> dict[str, str]:
+def get_games(input: str) -> dict[str, list[str]]:
     lines = [line.split(': ') for line in input.splitlines()]
     games = {game[0].split(' ')[1]: game[1].split('; ') for game in lines}
     
     return games
 
 
-def part_01(input: str) -> str:
+def part_01(input: str) -> int:
     games = get_games(input)
     
     total_ids = 0
@@ -32,7 +32,7 @@ def part_01(input: str) -> str:
     return total_ids
 
 
-def part_02(input: str) -> str:
+def part_02(input: str) -> int:
     games = get_games(input)
     total = 0
     

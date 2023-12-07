@@ -1,5 +1,8 @@
 import math
 
+# TODO: Change from brute force to mathematically calculating bounds
+# We should be able to calculate the intersection points between a line and parabola
+# Then classify points based on that.
 
 def part_01(input: str) -> str:
     races = parse_races(input)
