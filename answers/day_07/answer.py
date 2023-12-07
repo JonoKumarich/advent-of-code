@@ -27,6 +27,12 @@ class Turn:
     bet: int
     
     def __lt__(self, other: "Turn") -> bool:
+        self_hand_type = calculate_hand_type(self.hand)
+        other_hand_type = calculate_hand_type(other.hand)
+        
+        if self_hand_type != other_hand_type:
+            return self_hand_type.value < other_hand_type.value
+        
         for i in range(len(self.hand)):
             self_card, other_card = self.hand[i], other.hand[i]
             if self_card == other_card:
@@ -40,17 +46,13 @@ class Turn:
 
 
 def part_01(input: str) -> int:
-    hands = parse_input(input)
-    num_hand_types = len(HandType)
-    values: list[list[Turn]] = [[] for _ in range(num_hand_types)]
+    turns = parse_input(input)
+    values: list[Turn] = []
     
-    for turn in hands:
-        hand_type = calculate_hand_type(turn.hand)
-        bisect.insort(values[hand_type.value], turn)
+    for turn in turns:
+        bisect.insort(values, turn)
     
-    # Flatten
-    scores = [item.bet for row in values for item in row]
-    return sum([(i + 1) * score for i, score in enumerate(scores)])
+    return sum([(i + 1) * turn.bet for i, turn in enumerate(values)])
     
 
 
