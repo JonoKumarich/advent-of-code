@@ -1,6 +1,3 @@
-from enum import Enum
-
-
 RELATIVE_POSITIONS = [(-1, 0), (+1, 0), (0, -1), (0, +1)]
 START_CHAR = 'S'
 
