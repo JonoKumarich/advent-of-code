@@ -1,4 +1,3 @@
-from itertools import combinations
 from functools import lru_cache
 
 
@@ -37,8 +36,7 @@ def part_02(input: str) -> int:
         total += add
         
     return total
-    
-# Optimisations:
+
 
 @lru_cache
 def calculate_record(remaining_record: tuple[str], remaining_arrangement: tuple[int]) -> int:
@@ -79,21 +77,4 @@ def calculate_record(remaining_record: tuple[str], remaining_arrangement: tuple[
             return calculate_record(tuple(remaining_record[remaining_arrangement[0]+1:]), tuple(remaining_arrangement)[1:])
         case _:
             raise ValueError(f"Invalid value found: '{remaining_record[0]}'")
-        
     
-    
-    
-
-def get_hash_groups(record: str) -> list[int]:
-    char_groups: list[int] = []
-    running_total = 0
-    for char in record:
-        if char == '#':
-            running_total += 1
-            continue
-        
-        char_groups.append(running_total)
-        running_total = 0
-    
-    char_groups.append(running_total)
-    return [char for char in char_groups if char != 0]
