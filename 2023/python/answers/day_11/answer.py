@@ -22,7 +22,7 @@ def part_01(input: str) -> int:
     return total
         
     
-def part_02(input: str) -> str:
+def part_02(input: str) -> int:
     """
     Steps:
         - Do not expant universe
