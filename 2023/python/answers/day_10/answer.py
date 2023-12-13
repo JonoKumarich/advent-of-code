@@ -41,7 +41,7 @@ def part_02(input: str) -> int:
     
     while True:
         # FIXME: Need to handle starting position of "S". 
-        # At the moment it will just work on the test case by change
+        # At the moment it will just work on the test case by chance
         pipe_positions[current_position[0]][current_position[1]] = grid[current_position[0]][current_position[1]]
         
         next_direction = find_next_direction(grid, current_position, previous_direction)
@@ -84,16 +84,7 @@ def part_02(input: str) -> int:
                         total_inside += 1
             
     return total_inside
-            
-            
-                
-                
-            
-            
-            
-                
-    
-    return total_inside
+
 
 
 def find_start(search_grid: list[list[str]]) -> tuple[int, int]:
