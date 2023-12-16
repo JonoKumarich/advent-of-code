@@ -1,26 +1,33 @@
-import time
-
-
 def part_01(input: str) -> int:
     grid = [list(line) for line in input.splitlines()]
     
     start = (0, -1)
     direction = (0, 1)
-    
-    # FIXME: We need to break the endless loops. 
-    # When seeing an already visited position & direction combo, we can early return
     visited_positions = travel_light_path(grid, start, direction, set())
-    
-    positions = {position for position, _ in visited_positions}
-    for position in positions:
-        grid[position[0]][position[1]] = 'X'
     
     return len({position for position, _ in visited_positions})
 
 
-def part_02(input: str) -> str:
-    return "Part two answer"
-
+def part_02(input: str) -> int:
+    grid = [list(line) for line in input.splitlines()]
+    max_visited = 0
+    
+    for n in range(len(grid)):
+        visited_positions = travel_light_path(grid, (n, -1), (0, 1), set())
+        max_visited = max(max_visited, len({position for position, _ in visited_positions}))
+        
+        visited_positions = travel_light_path(grid, (n, len(grid[0])), (0, -1), set())
+        max_visited = max(max_visited, len({position for position, _ in visited_positions}))
+    
+    for m in range(len(grid[0])):
+        visited_positions = travel_light_path(grid, (-1, m), (1, 0), set())
+        max_visited = max(max_visited, len({position for position, _ in visited_positions}))
+        
+        visited_positions = travel_light_path(grid, (m, len(grid)), (-1, 0), set())
+        max_visited = max(max_visited, len({position for position, _ in visited_positions}))
+        
+    return max_visited
+    
 
 def travel_light_path(
     grid: list[list[str]],
@@ -45,8 +52,6 @@ def travel_light_path(
         # Visited path before
         if (position, direction) in visited_paths:
             return visited_paths
-        
-        # print_grid(grid, position)
         
         visited_paths.add((position, direction))
         value = grid[position[0]][position[1]]
@@ -114,18 +119,3 @@ def change_backslash_direction(current_direction: tuple[int, int]) -> tuple[int,
             return (-1, 0)
         case _:
             raise ValueError(f'Invalid Direction: {current_direction}')
-
-
-def print_grid(grid: list[list[str]], position: tuple[int, int] | None = None) -> None:
-    # time.sleep(0.5)
-    input()
-    
-    display_grid = [row[:] for row in grid]
-    
-    if position is not None:
-        display_grid[position[0]][position[1]] = '$'
-    
-    for row in display_grid[25:65]:
-        print(''.join(row))
-
-    print()
