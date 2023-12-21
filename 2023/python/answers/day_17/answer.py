@@ -22,35 +22,52 @@ def part_01(input: str) -> int:
     dimensions = height, width
 
     start_node = (0, 0)
+    start_key = (start_node, Direction.UP, 0)
     final_node = (height - 1, width - 1)
     
-    distances: dict[Key, float] = {}
+    all_keys: set[Key] = set()
     for node in product(range(height), range(width)):
         if node == start_node:
             continue
         for direction in valid_directions(node, dimensions):
             for roll in range(1, valid_rolls(node, direction, dimensions) + 1):
-                distances[(node, direction, roll)] = float('inf')
+                all_keys.add((node, direction, roll))
     
-    distances[(start_node, None, 0)] = 0
-    unvisited: set[Key] = set(distances.keys())
-
-    while len(unvisited) > 0:
-        key = closest_key(unvisited, distances)
-
-        if key[0] == final_node:
+    all_keys.add(start_key)    
+    open_set: set[Key] = {start_key}
+    came_from: dict[Key, Key] = {}
+    
+    g_score: dict[Key, float] = {start_key: 0}
+    f_score: dict[Key, float] = {start_key: h_cost(start_node, final_node)}
+    
+    while len(open_set) > 0:
+        current = closest_key(open_set, g_score)
+        
+        if current[0] == final_node:
             break
         
-        print(key)
-
-        unvisited.remove(key)
-        for next_key in valid_keys(key, unvisited):
-            potential_distance = distances[key] + grid[next_key[0][0]][next_key[0][1]]
+        open_set.remove(current)
+        
+        for neighbor in valid_keys(current):
+            if neighbor not in all_keys:
+                continue
             
-            if potential_distance < distances[next_key]:
-                distances[next_key] = potential_distance
-                
-    return distances[key]
+            current_distance = g_score[current]
+            cost = grid[neighbor[0][0]][neighbor[0][1]]
+            tentative_g_score = current_distance + cost
+            
+            if tentative_g_score < g_score.get(neighbor, float('inf')):
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + h_cost(neighbor[0], final_node)
+                if neighbor not in open_set:
+                    open_set.add(neighbor)
+            
+    return int(min([val for key, val in g_score.items() if key[0] == final_node]))
+
+
+def h_cost(node: Node, end: Node) -> int:
+    return abs(node[0] - end[0]) + abs(node[1] - end[1])
 
 
 def valid_directions(node: Node, dimensions: tuple[int, int]) -> set[Direction]:
@@ -91,13 +108,12 @@ def valid_rolls(node: Node, direction: Direction, dimensions: tuple[int, int]) -
             return min(width - node[1] - 1, 3)
 
 
-def closest_key(unvisited: set[Key], distances: dict[Key, float]) -> Key:
-    # FIXME: This is a bottleneck
-    unvisited_distances = {k: v for (k, v) in distances.items() if k in unvisited}
-    return sorted(unvisited_distances.items(), key=lambda item: item[1])[0][0]
+def closest_key(open_set: set[Key], distances: dict[Key, float]) -> Key:
+    open_distances = {key: distances[key] for key in open_set}
+    return sorted(open_distances.items(), key=lambda x: x[1])[0][0]
 
 
-def valid_keys(key: Key, distance_keys: set[Key]) -> list[Key]:
+def valid_keys(key: Key) -> list[Key]:
     node, direction, moves = key
 
     if node == (0, 0):
@@ -136,7 +152,7 @@ def valid_keys(key: Key, distance_keys: set[Key]) -> list[Key]:
 
                 keys.append((new_node, d, 1))
 
-    return [key for key in keys if key in distance_keys]
+    return keys
 
 
 
