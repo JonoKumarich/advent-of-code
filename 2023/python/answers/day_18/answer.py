@@ -5,18 +5,37 @@ DIRECTIONS = {
     'R': (0, 1)
 }
 
+ENCODED_DIRECTIONS = {
+    0: 'R',
+    1: 'D',
+    2: 'L',
+    3: 'U'
+}
+
 
 def part_01(input: str) -> int:
     lines = [line.split() for line in input.splitlines()]
+    instructions = [(direction, int(num)) for direction, num, _ in lines]
+    return num_holes(instructions)
+    
+
+def part_02(input: str) -> int:
+    lines = [line.split()[2][2:-1] for line in input.splitlines()]
+    instructions = [(ENCODED_DIRECTIONS[int(line[-1])], int(line[:-1], 16)) for line in lines]
+    
+    return num_holes(instructions)
+
+
+def num_holes(instructions: list[tuple[str, int]]) -> int:
     current_position = (0, 0)
     corners = [(0, 0)]
     
     # Generate corners
-    for direction, num, _ in lines:
+    for direction, num in instructions:
         next_dir = DIRECTIONS[direction]
         next_position = (
-            current_position[0] + (next_dir[0] * int(num)),
-            current_position[1] + (next_dir[1] * int(num))
+            current_position[0] + (next_dir[0] * num),
+            current_position[1] + (next_dir[1] * num)
         )
         corners.append(next_position)
         current_position = next_position
@@ -103,9 +122,3 @@ def part_01(input: str) -> int:
                         total_inside += 1
             
     return total_inside + len(full_edges) - 1
-
-    
-    
-
-def part_02(input: str) -> str:
-    return "Part two answer"
